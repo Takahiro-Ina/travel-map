@@ -4,8 +4,6 @@ An interactive travel map for GitHub Pages.
 
 - Country color intensity represents the total number of visits.
 - Numbered city pins represent the number of visits to each city.
-- Clicking a country shows all visits to that country.
-- Clicking a city pin shows only visits to that city.
 - Event or project URLs are displayed only when a URL is provided.
 - Photos can be attached to each visit.
 
