@@ -1,6 +1,4 @@
 ﻿country_id,country,date,city,latitude,longitude,type,name,venue,url,images
-156,China,2025-09,Beijing,39.9042,116.4074,Conference,YMWSCV 2025,Beijing Normal University,https://example.com,
-156,China,2026-03,Shanghai,31.2304,121.4737,Research Visit,Joint Research Visit,Fudan University,,
-156,China,2026-07,Beijing,39.9042,116.4074,Conference,Complex Analysis Workshop,Peking University,,
-410,South Korea,2026-08,Seoul,37.5665,126.9780,Conference,International Conference,Seoul National University,,
-250,France,2019-06,Paris,48.8566,2.3522,Research Visit,Research Stay,Sorbonne University,,
+410,South Korea,2019-10,Seoul,37.5928,127.0458,Conference,Progress in Several Complex Variables,KIAS,https://events.kias.re.kr/h/PSCV19/?pageNo=3867,
+410,South Korea,2025-04,Daejeon,36.375959,127.385751,Conference,Progress in Complex Geometry,IBS CCG,https://ccg.ibs.re.kr/event/2025-0421-0424/,
+156,China,2025-09,Beijing,39.96,116.36,Conference,YMWSCV 2025,Beijing Normal University,,
