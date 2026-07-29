@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Travel Map</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">TRAVEL HISTORY</p>
+      <h1>Places I Have Visited</h1>
+      <p class="intro">
+        Country color intensity represents the total number of visits.
+        Numbered pins show visited cities. Click a country or city pin to view details.
+      </p>
+    </header>
+
+    <section class="stats" aria-label="Travel statistics">
+      <article><strong id="countryCount">0</strong><span>countries</span></article>
+      <article><strong id="cityCount">0</strong><span>cities</span></article>
+      <article><strong id="tripCount">0</strong><span>visits</span></article>
+      <article><strong id="latestVisit">—</strong><span>latest visit</span></article>
+    </section>
+
+    <section class="map-layout">
+      <div class="map-column">
+        <div id="mapStatus" class="status">Loading map…</div>
+        <svg id="worldMap" role="img"
+             aria-label="World map showing visited countries and city pins"></svg>
+
+        <div class="legend" aria-label="Map legend">
+          <span>Country visits</span>
+          <i class="level level-0"></i>
+          <i class="level level-1"></i>
+          <i class="level level-2"></i>
+          <i class="level level-3"></i>
+          <i class="level level-4"></i>
+          <span>More</span>
+          <span class="pin-legend"><i>2</i> City visits</span>
+        </div>
+      </div>
+
+      <aside id="detailPanel" class="detail-panel" aria-live="polite">
+        <div class="empty-state">
+          <h2>Select a place</h2>
+          <p>Click a colored country or a city pin to view travel details and photos.</p>
+        </div>
+      </aside>
+    </section>
+
+    <footer>
+      <p>Last updated: <span id="lastUpdated"></span></p>
+    </footer>
+  </main>
+
+  <div id="lightbox" class="lightbox" hidden>
+    <button id="closeLightbox" type="button" aria-label="Close image">×</button>
+    <img id="lightboxImage" alt="">
+    <p id="lightboxCaption"></p>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
