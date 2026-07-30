@@ -13,47 +13,14 @@
   <link rel="stylesheet" href="style.css">
 </head>
 
-<!--
-  class="embed"  -> hides the title / footer (for embedding in Google Sites)
-  Remove "embed" to show them on a standalone page.
--->
-<body class="embed">
+<body>
   <main class="page">
-    <header class="hero">
-      <p class="eyebrow">TRAVEL HISTORY</p>
-      <h1>Places I Have Visited</h1>
-      <p class="intro">
-        Color intensity shows how many times I have visited each country.
-        Dots are visited cities. Hover for a summary, click for details.
-      </p>
-    </header>
-
     <section class="map-layout">
       <div class="map-frame">
         <div id="mapStatus" class="status">Loading map…</div>
 
         <svg id="worldMap" role="img"
              aria-label="World map showing visited countries and city dots"></svg>
-
-        <!-- On-map heads-up display -->
-        <div class="hud" aria-label="Map summary and legend">
-          <div class="hud-stats">
-            <div><strong id="countryCount">0</strong><span>countries</span></div>
-            <div><strong id="cityCount">0</strong><span>cities</span></div>
-            <div><strong id="tripCount">0</strong><span>visits</span></div>
-            <div><strong id="latestVisit">—</strong><span>latest</span></div>
-          </div>
-
-          <div class="hud-legend">
-            <span class="hud-title">Visits per country</span>
-            <ul>
-              <li><i class="level-1"></i>1</li>
-              <li><i class="level-2"></i>2–3</li>
-              <li><i class="level-3"></i>4–6</li>
-              <li><i class="level-4"></i>7+</li>
-            </ul>
-          </div>
-        </div>
 
         <div class="zoom-controls">
           <button id="zoomIn" type="button" aria-label="Zoom in">+</button>
@@ -70,8 +37,11 @@
       </div>
     </section>
 
+    <!-- Visited countries, grouped by region. Built from travels.csv. -->
+    <section id="countryIndex" class="country-index" aria-label="Visited countries"></section>
+
     <footer>
-      <p>Last updated: <span id="lastUpdated"></span></p>
+      <p>Last updated <span id="lastUpdated">—</span></p>
     </footer>
   </main>
 
