@@ -36,7 +36,11 @@ const CONFIG = {
   shadeHalfway: 7,
 
   hideAntarctica: true,
-  maxZoom: 14
+  maxZoom: 14,
+
+  /* Pointer movement below this many pixels still counts as a click rather
+     than a drag. Raise it if clicks ever feel like they are being swallowed. */
+  clickSlack: 8
 };
 
 const WORLD_URL =
@@ -873,18 +877,12 @@ function setupMap(data, world) {
 
   /* --- interaction ---------------------------------------------------- */
 
-  let panned = false;
-  let panEndedAt = 0;
-
-  const justPanned = () => Date.now() - panEndedAt < 200;
-
   countryPaths
     .filter(f => Boolean(countryOf(f)))
     .on("mouseenter", (event, f) => showTooltip(event, countryTooltipHtml(countryOf(f))))
     .on("mousemove", event => moveTooltip(event))
     .on("mouseleave", hideTooltip)
     .on("click", (event, f) => {
-      if (justPanned()) return;
       renderCountry(String(f.id).padStart(3, "0"));
     })
     .on("keydown", (event, f) => {
@@ -926,8 +924,6 @@ function setupMap(data, world) {
     .on("blur", hideTooltip)
     .on("click", (event, city) => {
       event.stopPropagation();
-      if (justPanned()) return;
-
       hideTooltip();
       renderCity(city);
     })
@@ -956,7 +952,6 @@ function setupMap(data, world) {
 
   document.addEventListener("click", event => {
     if (!panel.classList.contains("is-open")) return;
-    if (justPanned()) return;
     if (event.target.closest(KEEPS_PANEL_OPEN)) return;
 
     closePanel();
@@ -969,27 +964,24 @@ function setupMap(data, world) {
   const zoom = d3
     .zoom()
     .scaleExtent([1, CONFIG.maxZoom])
+    /*
+     * d3-zoom defaults clickDistance to 0, so a single pixel of pointer slip
+     * between mousedown and mouseup counts as a drag — and d3 then kills the
+     * click event in the capture phase. On a trackpad that is almost every
+     * click, which made both "click a country" and "click outside to close"
+     * fail intermittently. Anything under this many pixels is now a click.
+     */
+    .clickDistance(CONFIG.clickSlack)
     .translateExtent([
       [0, 0],
       [width, height]
     ])
-    .on("start", () => {
-      panned = false;
-      hideTooltip();
-    })
+    .on("start", hideTooltip)
     .on("zoom", event => {
-      if (event.sourceEvent && event.sourceEvent.type === "mousemove") {
-        panned = true;
-      }
-
       zoomLayer.attr("transform", event.transform);
 
       if (frame) cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => applyScale(event.transform.k));
-    })
-    .on("end", () => {
-      if (panned) panEndedAt = Date.now();
-      panned = false;
     });
 
   svg.call(zoom).on("dblclick.zoom", null);
