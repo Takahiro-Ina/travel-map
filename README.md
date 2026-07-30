@@ -72,6 +72,33 @@ Multiple images are separated with `|`:
 images/china/photo-1.jpg::Venue|images/china/photo-2.jpg::Beijing
 ```
 
+## Appearance settings
+
+All visual knobs live in the `CONFIG` object at the top of `script.js`:
+
+| Key | Default | Meaning |
+| --- | --- | --- |
+| `showCountryCounts` | `false` | `false` = shading only; `true` = faint numbers, auto-sized so they never overflow a country (countries too small to fit a legible number are skipped) |
+| `cityDotRadius` | `2.1` | City dot radius, in on-screen units. Stays constant while zooming |
+| `cityDotStroke` | `0.7` | White outline width of a city dot |
+| `cityDotGap` | `1.3` | Minimum clear space between two dots. Dots that would overlap are nudged apart and joined to their true position by a hairline |
+| `minLabelSize` | `5.5` | Smallest label that is still drawn |
+| `hideAntarctica` | `true` | Drops Antarctica so the map fills the frame |
+| `maxZoom` | `14` | Zoom ceiling |
+
+Colors are CSS variables at the top of `style.css` (`--l1` … `--l4` for the
+visit ramp, `--pin` for city dots, `--land-0` for unvisited countries).
+
+`<body class="embed">` in `index.html` hides the page title and footer, which
+is what you want inside a Google Sites embed. Remove `embed` to show them.
+
+## Interaction
+
+- Hover a country or a city dot for a summary; click for the full panel.
+- Scroll or pinch to zoom, drag to pan, or use the buttons in the corner.
+- As you zoom in, nudged dots settle back onto their true coordinates.
+- `Esc` closes the panel, the photo lightbox, and any tooltip.
+
 ## Updating an existing repository
 
 Replace these files:
