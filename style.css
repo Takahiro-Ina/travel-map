@@ -37,6 +37,9 @@
   --radius:       14px;
 }
 
+/* Uncomment to hide the "Last updated" line. */
+/* footer { display: none; } */
+
 * { box-sizing: border-box; }
 
 html, body {
@@ -57,11 +60,6 @@ body {
 
 button, input, select { font: inherit; }
 
-/* Embedded mode: map only ------------------------------------------------ */
-
-body.embed .hero,
-body.embed footer { display: none; }
-
 /* Page ------------------------------------------------------------------- */
 
 .page {
@@ -69,33 +67,6 @@ body.embed footer { display: none; }
   max-width: 1180px;
   margin: 0 auto;
   padding: 0;
-}
-
-body:not(.embed) .page { padding: 44px 20px 32px; }
-
-.hero { margin-bottom: 26px; }
-
-.eyebrow {
-  margin: 0 0 6px;
-  color: var(--accent);
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-}
-
-.hero h1 {
-  margin: 0;
-  font-family: "Instrument Serif", Georgia, serif;
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-}
-
-.intro {
-  max-width: 60ch;
-  margin: 10px 0 0;
-  color: var(--muted);
-  line-height: 1.7;
 }
 
 /* Map frame ------------------------------------------------------------- */
@@ -111,10 +82,7 @@ body:not(.embed) .page { padding: 44px 20px 32px; }
     radial-gradient(115% 90% at 50% 0%, #fbfaf8 0%, var(--sea) 62%, #f2f0eb 100%);
 }
 
-body:not(.embed) .map-frame {
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-s);
-}
+
 
 #worldMap {
   display: block;
@@ -136,7 +104,7 @@ body:not(.embed) .map-frame {
 /* Countries -------------------------------------------------------------- */
 
 .country {
-  fill: var(--land-0);
+  fill: var(--fill, var(--land-0));
   stroke: var(--land-line);
   stroke-width: 0.6;
   vector-effect: non-scaling-stroke;
@@ -156,11 +124,6 @@ body:not(.embed) .map-frame {
   stroke: var(--ink);
   stroke-width: 1.4;
 }
-
-.visits-1 { fill: var(--l1); }
-.visits-2 { fill: var(--l2); }
-.visits-3 { fill: var(--l3); }
-.visits-4 { fill: var(--l4); }
 
 /* Sphere outline + graticule */
 
@@ -231,101 +194,6 @@ body:not(.embed) .map-frame {
 }
 
 .city-halo.is-on { opacity: 0.55; }
-
-/* Heads-up display ------------------------------------------------------- */
-
-.hud {
-  position: absolute;
-  left: 14px;
-  bottom: 14px;
-  z-index: 10;
-
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-
-  padding: 12px 14px;
-  border: 1px solid rgba(20, 30, 28, 0.07);
-  border-radius: 12px;
-
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: var(--shadow-s);
-
-  pointer-events: none;
-}
-
-.hud-stats {
-  display: flex;
-  gap: 16px;
-}
-
-.hud-stats div {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
-
-.hud-stats strong {
-  font-size: 1.15rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
-}
-
-.hud-stats span {
-  margin-top: 3px;
-  color: var(--muted);
-  font-size: 0.62rem;
-  font-weight: 500;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.hud-legend {
-  padding-top: 9px;
-  border-top: 1px solid rgba(20, 30, 28, 0.08);
-}
-
-.hud-title {
-  display: block;
-  margin-bottom: 6px;
-  color: var(--muted);
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.hud-legend ul {
-  display: flex;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.hud-legend li {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--muted);
-  font-size: 0.68rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.hud-legend i {
-  display: block;
-  width: 11px;
-  height: 11px;
-  border-radius: 3px;
-}
-
-.level-1 { background: var(--l1); }
-.level-2 { background: var(--l2); }
-.level-3 { background: var(--l3); }
-.level-4 { background: var(--l4); }
 
 /* Zoom controls ---------------------------------------------------------- */
 
@@ -781,29 +649,97 @@ body:not(.embed) .map-frame {
   letter-spacing: 0.03em;
 }
 
+/* Country index --------------------------------------------------------- */
+
+.country-index {
+  display: grid;
+  gap: 18px;
+  padding: 22px 4px 4px;
+}
+
+.index-group h2 {
+  margin: 0 0 9px;
+  color: var(--muted);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.index-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.index-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 5px 11px 5px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+
+  background: #ffffff;
+  color: var(--ink);
+
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease,
+              transform 140ms ease;
+}
+
+.index-chip i {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  background: var(--swatch, var(--land-0));
+}
+
+.index-chip b {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.index-chip:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.index-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.index-chip.is-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.index-chip.is-active b { color: var(--accent); }
+
 /* Footer ---------------------------------------------------------------- */
 
 footer {
-  margin-top: 22px;
+  padding: 9px 4px 2px;
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-align: right;
 }
 
 footer p { margin: 0; }
 
+footer span { font-variant-numeric: tabular-nums; }
+
 /* Responsive ------------------------------------------------------------ */
 
 @media (max-width: 760px) {
-  .hud {
-    left: 10px;
-    bottom: 10px;
-    padding: 10px 11px;
-  }
-
-  .hud-stats { gap: 12px; }
-  .hud-stats strong { font-size: 1rem; }
-  .hud-legend { display: none; }
-
   .zoom-controls { right: 10px; bottom: 10px; }
 
   .detail-panel {
@@ -819,5 +755,4 @@ footer p { margin: 0; }
 
 @media (max-width: 480px) {
   .gallery { grid-template-columns: 1fr; }
-  .hud-stats div:nth-child(4) { display: none; }
 }
