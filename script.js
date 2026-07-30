@@ -703,6 +703,13 @@ function setupMap(data, world) {
   }
 
   function applyScale(scale) {
+    /*
+     * At rest the map leaves vertical touch gestures to the page, so an embed
+     * never traps scrolling. Once zoomed in it claims them so the map can be
+     * panned in both directions; the reset button gives scrolling back.
+     */
+    svg.classed("is-zoomed", scale > 1.01);
+
     resolveOverlaps(scale);
 
     cityDots
@@ -759,6 +766,16 @@ function setupMap(data, world) {
     clearSelection();
   }
 
+  /*
+   * Moving focus into the panel guarantees this frame is the focused one, which
+   * is what makes the window blur above fire when the host page is tapped. It
+   * also puts the keyboard where the new content is.
+   */
+  function openPanel() {
+    panel.classList.add("is-open");
+    panel.querySelector(".panel-close")?.focus({ preventScroll: true });
+  }
+
   function selectCountryShape(countryId) {
     countryPaths.classed(
       "selected",
@@ -785,7 +802,7 @@ function setupMap(data, world) {
       photos
     });
 
-    panel.classList.add("is-open");
+    openPanel();
     syncChips(countryId);
     bindPhotoButtons(photos);
   }
@@ -808,7 +825,7 @@ function setupMap(data, world) {
       photos
     });
 
-    panel.classList.add("is-open");
+    openPanel();
     syncChips(city.countryId);
     bindPhotoButtons(photos);
   }
@@ -963,6 +980,17 @@ function setupMap(data, world) {
     closePanel();
   });
 
+  /*
+   * When the map is embedded in another site, a tap on the host page never
+   * reaches this document: cross-origin frames cannot see each other's events.
+   * Losing focus is the one signal that does cross that boundary, so treat it
+   * as a click away. Switching browser tabs closes the panel too, which is
+   * harmless.
+   */
+  window.addEventListener("blur", () => {
+    if (panel.classList.contains("is-open")) closePanel();
+  });
+
   /* --- zoom ----------------------------------------------------------- */
 
   let frame = null;
@@ -991,13 +1019,17 @@ function setupMap(data, world) {
       [0, 0],
       [width, height]
     ])
-    .on("start", hideTooltip)
+    .on("start", () => {
+      hideTooltip();
+      svg.classed("is-panning", true);
+    })
     .on("zoom", event => {
       zoomLayer.attr("transform", event.transform);
 
       if (frame) cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => applyScale(event.transform.k));
-    });
+    })
+    .on("end", () => svg.classed("is-panning", false));
 
   svg.call(zoom).on("dblclick.zoom", null);
 
