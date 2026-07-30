@@ -94,6 +94,9 @@ button, input, select { font: inherit; }
 
 #worldMap.is-panning { cursor: grabbing; }
 
+/* Zoomed in, the map claims touch gestures so it can be panned vertically. */
+#worldMap.is-zoomed { touch-action: none; }
+
 .status {
   padding: 90px 12px;
   color: var(--muted);
