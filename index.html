@@ -4,50 +4,70 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My Travel Map</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif&display=swap">
+
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+
+<!--
+  class="embed"  -> hides the title / footer (for embedding in Google Sites)
+  Remove "embed" to show them on a standalone page.
+-->
+<body class="embed">
   <main class="page">
     <header class="hero">
       <p class="eyebrow">TRAVEL HISTORY</p>
       <h1>Places I Have Visited</h1>
       <p class="intro">
-        Country color intensity represents the total number of visits.
-        Numbered pins show visited cities. Click a country or city pin to view details.
+        Color intensity shows how many times I have visited each country.
+        Dots are visited cities. Hover for a summary, click for details.
       </p>
     </header>
 
-    <section class="stats" aria-label="Travel statistics">
-      <article><strong id="countryCount">0</strong><span>countries</span></article>
-      <article><strong id="cityCount">0</strong><span>cities</span></article>
-      <article><strong id="tripCount">0</strong><span>visits</span></article>
-      <article><strong id="latestVisit">—</strong><span>latest visit</span></article>
-    </section>
-
     <section class="map-layout">
-      <div class="map-column">
+      <div class="map-frame">
         <div id="mapStatus" class="status">Loading map…</div>
+
         <svg id="worldMap" role="img"
-             aria-label="World map showing visited countries and city pins"></svg>
+             aria-label="World map showing visited countries and city dots"></svg>
 
-        <div class="legend" aria-label="Map legend">
-          <span>Country visits</span>
-          <i class="level level-0"></i>
-          <i class="level level-1"></i>
-          <i class="level level-2"></i>
-          <i class="level level-3"></i>
-          <i class="level level-4"></i>
-          <span>More</span>
-          <span class="pin-legend"><i>2</i> City visits</span>
+        <!-- On-map heads-up display -->
+        <div class="hud" aria-label="Map summary and legend">
+          <div class="hud-stats">
+            <div><strong id="countryCount">0</strong><span>countries</span></div>
+            <div><strong id="cityCount">0</strong><span>cities</span></div>
+            <div><strong id="tripCount">0</strong><span>visits</span></div>
+            <div><strong id="latestVisit">—</strong><span>latest</span></div>
+          </div>
+
+          <div class="hud-legend">
+            <span class="hud-title">Visits per country</span>
+            <ul>
+              <li><i class="level-1"></i>1</li>
+              <li><i class="level-2"></i>2–3</li>
+              <li><i class="level-3"></i>4–6</li>
+              <li><i class="level-4"></i>7+</li>
+            </ul>
+          </div>
         </div>
+
+        <div class="zoom-controls">
+          <button id="zoomIn" type="button" aria-label="Zoom in">+</button>
+          <button id="zoomOut" type="button" aria-label="Zoom out">−</button>
+          <button id="zoomReset" type="button" aria-label="Reset view">↺</button>
+        </div>
+
+        <aside id="detailPanel" class="detail-panel" aria-live="polite">
+          <div class="empty-state">
+            <h2>Select a place</h2>
+            <p>Click a shaded country or a city dot to see travel details and photos.</p>
+          </div>
+        </aside>
       </div>
-
-      <aside id="detailPanel" class="detail-panel" aria-live="polite">
-        <div class="empty-state">
-          <h2>Select a place</h2>
-          <p>Click a colored country or a city pin to view travel details and photos.</p>
-        </div>
-      </aside>
     </section>
 
     <footer>
