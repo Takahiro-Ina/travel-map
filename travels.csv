@@ -1,4 +1,4 @@
 ﻿country_id,country,date,city,latitude,longitude,type,name,venue,url,images
-410,South Korea,2019-10,Seoul,37.5665,126.9780,Conference,Progress in Several Complex Variables,KIAS,https://events.kias.re.kr/h/PSCV19/?pageNo=3867,2019-kias.jpg
-410,South Korea,2025-04,Daejeon,36.3504,127.3845,Conference,Progress in Complex Geometry,IBS CCG,https://ccg.ibs.re.kr/event/2025-0421-0424/,2025_Apr_Group-photo-wide_300-scaled.jpg
+410,South Korea,2019-10,Seoul,37.5665,126.9780,Conference,Progress in Several Complex Variables,KIAS,https://events.kias.re.kr/h/PSCV19/?pageNo=3867,images/south-korea/2019-kias.jpg
+410,South Korea,2025-04,Daejeon,36.3504,127.3845,Conference,Progress in Complex Geometry,IBS CCG,https://ccg.ibs.re.kr/event/2025-0421-0424/,images/south-korea/2025_Apr_Group-photo-wide_300-scaled.jpg
 156,China,2025-09,Beijing,39.9042,116.4074,Conference,YMWSCV 2025,Beijing Normal University,,
