@@ -17,15 +17,13 @@ const height = 520;
 svg.attr("viewBox", `0 0 ${width} ${height}`);
 
 /*
- * Convert the images column into an array.
- *
- * Examples:
- * images/south-korea/photo1.jpg
- *
- * images/south-korea/photo1.jpg|images/south-korea/photo2.jpg
- *
- * The old ::caption format also remains supported.
+ * Tooltip shown when the cursor is placed over a city dot.
  */
+const tooltip = document.createElement("div");
+tooltip.className = "city-tooltip";
+tooltip.hidden = true;
+document.body.appendChild(tooltip);
+
 function parseImages(value = "") {
   if (!value.trim()) {
     return [];
@@ -49,9 +47,6 @@ function parseCoordinate(value) {
   return Number.isFinite(number) ? number : null;
 }
 
-/*
- * Build country, city, and visit data from travels.csv.
- */
 function buildTravelData(rows) {
   const countries = {};
   const cities = new Map();
@@ -64,15 +59,15 @@ function buildTravelData(rows) {
 
     const visit = {
       countryId,
-      country: row.country,
-      date: row.date,
-      city: row.city,
+      country: row.country || "",
+      date: row.date || "",
+      city: row.city || "",
       latitude,
       longitude,
-      type: row.type,
-      name: row.name,
-      venue: row.venue,
-      url: row.url,
+      type: row.type || "",
+      name: row.name || "",
+      venue: row.venue || "",
+      url: row.url || "",
       images: parseImages(row.images)
     };
 
@@ -80,7 +75,7 @@ function buildTravelData(rows) {
 
     if (!countries[countryId]) {
       countries[countryId] = {
-        country: row.country,
+        country: visit.country,
         visits: []
       };
     }
@@ -88,16 +83,16 @@ function buildTravelData(rows) {
     countries[countryId].visits.push(visit);
 
     /*
-     * Group multiple visits to the same city into one city pin.
+     * Multiple visits to the same city are combined into one dot.
      */
     if (
-      row.city &&
+      visit.city &&
       latitude !== null &&
       longitude !== null
     ) {
       const cityKey = [
         countryId,
-        row.city.trim().toLowerCase(),
+        visit.city.trim().toLowerCase(),
         latitude.toFixed(4),
         longitude.toFixed(4)
       ].join("|");
@@ -105,8 +100,8 @@ function buildTravelData(rows) {
       if (!cities.has(cityKey)) {
         cities.set(cityKey, {
           countryId,
-          country: row.country,
-          city: row.city,
+          country: visit.country,
+          city: visit.city,
           latitude,
           longitude,
           visits: []
@@ -124,9 +119,6 @@ function buildTravelData(rows) {
   };
 }
 
-/*
- * Country color level based on visit count.
- */
 function visitLevel(count) {
   if (count <= 0) return 0;
   if (count === 1) return 1;
@@ -171,12 +163,11 @@ function safeUrl(value = "") {
   }
 }
 
-/*
- * Create visit information cards.
- */
 function renderVisitCards(visits) {
   return [...visits]
-    .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+    .sort((a, b) =>
+      String(b.date).localeCompare(String(a.date))
+    )
     .map(visit => {
       const url = safeUrl(visit.url);
 
@@ -229,9 +220,6 @@ function renderVisitCards(visits) {
     .join("");
 }
 
-/*
- * Collect all photos belonging to the selected city or country.
- */
 function collectPhotos(visits, fallbackPlace) {
   return visits.flatMap(visit =>
     visit.images.map(image => ({
@@ -276,16 +264,13 @@ function renderPhotos(photos) {
   `;
 }
 
-/*
- * Open the full-size photo viewer.
- */
 function bindPhotoButtons(photos) {
   panel
     .querySelectorAll("[data-photo-index]")
     .forEach(button => {
       button.addEventListener("click", () => {
-        const index = Number(button.dataset.photoIndex);
-        const photo = photos[index];
+        const photo =
+          photos[Number(button.dataset.photoIndex)];
 
         if (!photo) {
           return;
@@ -303,61 +288,90 @@ function bindPhotoButtons(photos) {
 }
 
 /*
- * Shift pins that are too close to each other.
- *
- * The real latitude and longitude are not changed.
- * Only the displayed SVG position is moved.
+ * Text displayed when hovering over a city dot.
  */
-function spreadNearbyPins(cities, minimumDistance = 32) {
-  const placedPins = [];
+function createCityTooltip(city) {
+  const visits = [...city.visits].sort((a, b) =>
+    String(b.date).localeCompare(String(a.date))
+  );
 
-  return cities.map(city => {
-    const anchorX = city.x;
-    const anchorY = city.y;
+  const visitItems = visits
+    .map(visit => `
+      <div class="tooltip-visit">
+        <div class="tooltip-date">
+          ${escapeHtml(formatDate(visit.date))}
+        </div>
 
-    let displayX = anchorX;
-    let displayY = anchorY;
+        ${
+          visit.name
+            ? `
+              <div class="tooltip-event">
+                ${escapeHtml(visit.name)}
+              </div>
+            `
+            : ""
+        }
 
-    let radius = 0;
-    let angle = 0;
-    let attempts = 0;
+        ${
+          visit.venue
+            ? `
+              <div class="tooltip-venue">
+                ${escapeHtml(visit.venue)}
+              </div>
+            `
+            : ""
+        }
+      </div>
+    `)
+    .join("");
 
-    const overlapsAnotherPin = () =>
-      placedPins.some(pin =>
-        Math.hypot(
-          displayX - pin.x,
-          displayY - pin.y
-        ) < minimumDistance
-      );
+  return `
+    <div class="tooltip-city">
+      ${escapeHtml(city.city)}
+    </div>
 
-    while (overlapsAnotherPin() && attempts < 60) {
-      /*
-       * Move in a gradually expanding spiral.
-       */
-      attempts += 1;
-      radius = 12 + attempts * 2.2;
-      angle = attempts * 2.4;
+    <div class="tooltip-country">
+      ${escapeHtml(city.country)}
+    </div>
 
-      displayX =
-        anchorX + Math.cos(angle) * radius;
+    ${visitItems}
+  `;
+}
 
-      displayY =
-        anchorY + Math.sin(angle) * radius;
-    }
+function showTooltip(event, city) {
+  tooltip.innerHTML = createCityTooltip(city);
+  tooltip.hidden = false;
+  moveTooltip(event);
+}
 
-    placedPins.push({
-      x: displayX,
-      y: displayY
-    });
+function moveTooltip(event) {
+  const spacing = 14;
 
-    return {
-      ...city,
-      anchorX,
-      anchorY,
-      x: displayX,
-      y: displayY
-    };
-  });
+  let left = event.clientX + spacing;
+  let top = event.clientY + spacing;
+
+  const tooltipRect = tooltip.getBoundingClientRect();
+
+  if (left + tooltipRect.width > window.innerWidth - 8) {
+    left =
+      event.clientX -
+      tooltipRect.width -
+      spacing;
+  }
+
+  if (top + tooltipRect.height > window.innerHeight - 8) {
+    top =
+      event.clientY -
+      tooltipRect.height -
+      spacing;
+  }
+
+  tooltip.style.left = `${Math.max(8, left)}px`;
+  tooltip.style.top = `${Math.max(8, top)}px`;
+}
+
+function hideTooltip() {
+  tooltip.hidden = true;
 }
 
 function setupMap(data) {
@@ -384,7 +398,7 @@ function setupMap(data) {
       .classed("selected", false);
 
     svg
-      .selectAll(".city-pin")
+      .selectAll(".city-dot")
       .classed("selected", false);
   }
 
@@ -393,9 +407,6 @@ function setupMap(data) {
     clearSelection();
   }
 
-  /*
-   * Open country details.
-   */
   function renderCountry(countryId) {
     const item = data.countries[countryId];
 
@@ -464,9 +475,6 @@ function setupMap(data) {
     bindPhotoButtons(photos);
   }
 
-  /*
-   * Open city details.
-   */
   function renderCity(cityItem, cityKey) {
     clearSelection();
 
@@ -480,7 +488,7 @@ function setupMap(data) {
       );
 
     svg
-      .selectAll(".city-pin")
+      .selectAll(".city-dot")
       .classed(
         "selected",
         city => city.key === cityKey
@@ -527,11 +535,13 @@ function setupMap(data) {
   }
 
   /*
-   * Draw countries.
+   * Draw country shapes.
    */
-  svg
+  const countriesLayer = svg
     .append("g")
-    .attr("class", "countries-layer")
+    .attr("class", "countries-layer");
+
+  const countryPaths = countriesLayer
     .selectAll("path")
     .data(countryFeatures.features)
     .join("path")
@@ -560,7 +570,9 @@ function setupMap(data) {
       return item
         ? `${item.country}: ${item.visits.length} visits`
         : null;
-    })
+    });
+
+  countryPaths
     .filter(country => {
       const id = String(country.id).padStart(3, "0");
       return Boolean(data.countries[id]);
@@ -586,9 +598,36 @@ function setupMap(data) {
     });
 
   /*
-   * Convert city latitude and longitude into SVG positions.
+   * Display the visit count near the center of each visited country.
    */
-  const projectedCities = data.cities
+  const visitedCountryFeatures =
+    countryFeatures.features.filter(country => {
+      const id = String(country.id).padStart(3, "0");
+      return Boolean(data.countries[id]);
+    });
+
+  const countryCountLayer = svg
+    .append("g")
+    .attr("class", "country-count-layer");
+
+  countryCountLayer
+    .selectAll("text")
+    .data(visitedCountryFeatures)
+    .join("text")
+    .attr("class", "country-visit-count")
+    .attr("x", country => path.centroid(country)[0])
+    .attr("y", country => path.centroid(country)[1])
+    .attr("text-anchor", "middle")
+    .attr("dominant-baseline", "central")
+    .text(country => {
+      const id = String(country.id).padStart(3, "0");
+      return data.countries[id].visits.length;
+    });
+
+  /*
+   * Convert city coordinates to map coordinates.
+   */
+  const cityData = data.cities
     .map((city, index) => {
       const point = projection([
         city.longitude,
@@ -609,51 +648,20 @@ function setupMap(data) {
     .filter(Boolean);
 
   /*
-   * Automatically separate nearby city pins.
+   * Draw small city dots.
    */
-  const cityData = spreadNearbyPins(
-    projectedCities,
-    32
-  );
-
-  const pinsLayer = svg
+  const cityLayer = svg
     .append("g")
-    .attr("class", "pins-layer");
+    .attr("class", "city-dots-layer");
 
-  /*
-   * Draw connector lines for pins that were moved.
-   */
-  pinsLayer
-    .selectAll(".pin-connector")
-    .data(
-      cityData.filter(city => {
-        const movedDistance = Math.hypot(
-          city.x - city.anchorX,
-          city.y - city.anchorY
-        );
-
-        return movedDistance > 2;
-      })
-    )
-    .join("line")
-    .attr("class", "pin-connector")
-    .attr("x1", city => city.anchorX)
-    .attr("y1", city => city.anchorY)
-    .attr("x2", city => city.x)
-    .attr("y2", city => city.y);
-
-  /*
-   * Draw city pins.
-   */
-  const pinGroups = pinsLayer
-    .selectAll(".city-pin")
+  const cityDots = cityLayer
+    .selectAll("circle")
     .data(cityData)
-    .join("g")
-    .attr("class", "city-pin")
-    .attr(
-      "transform",
-      city => `translate(${city.x},${city.y})`
-    )
+    .join("circle")
+    .attr("class", "city-dot")
+    .attr("cx", city => city.x)
+    .attr("cy", city => city.y)
+    .attr("r", 3.2)
     .attr("tabindex", 0)
     .attr(
       "aria-label",
@@ -661,29 +669,38 @@ function setupMap(data) {
         `${city.city}, ${city.country}: ${city.visits.length} visits`
     );
 
-  pinGroups
-    .append("circle")
-    .attr(
-      "r",
-      city => (city.visits.length > 9 ? 13 : 11)
-    );
+  cityDots
+    .on("mouseenter", (event, city) => {
+      showTooltip(event, city);
+    })
+    .on("mousemove", event => {
+      moveTooltip(event);
+    })
+    .on("mouseleave", () => {
+      hideTooltip();
+    })
+    .on("focus", (event, city) => {
+      /*
+       * Keyboard focus does not always have useful mouse coordinates,
+       * so the browser's element position is used instead.
+       */
+      const rect =
+        event.currentTarget.getBoundingClientRect();
 
-  pinGroups
-    .append("text")
-    .attr("text-anchor", "middle")
-    .attr("dy", "0.35em")
-    .text(city => city.visits.length);
-
-  pinGroups
-    .append("title")
-    .text(
-      city =>
-        `${city.city}, ${city.country} — ${city.visits.length} visits`
-    );
-
-  pinGroups
+      showTooltip(
+        {
+          clientX: rect.left + rect.width / 2,
+          clientY: rect.top + rect.height / 2
+        },
+        city
+      );
+    })
+    .on("blur", () => {
+      hideTooltip();
+    })
     .on("click", (event, city) => {
       event.stopPropagation();
+      hideTooltip();
       renderCity(city, city.key);
     })
     .on("keydown", (event, city) => {
@@ -692,35 +709,22 @@ function setupMap(data) {
         event.key === " "
       ) {
         event.preventDefault();
+        hideTooltip();
         renderCity(city, city.key);
       }
     });
 
-  /*
-   * Close the detail card when the × button is clicked.
-   */
   panel.addEventListener("click", event => {
     if (event.target.closest("[data-close-panel]")) {
       closePanel();
     }
   });
 
-  /*
-   * Remove the loading message.
-   */
   if (status) {
     status.remove();
   }
-
-  /*
-   * Do not automatically select the first city.
-   * The initial screen therefore shows only the map.
-   */
 }
 
-/*
- * Load travels.csv and initialize the map.
- */
 try {
   const rows = await d3.csv("travels.csv");
   const data = buildTravelData(rows);
@@ -735,9 +739,6 @@ try {
   }
 }
 
-/*
- * Photo lightbox controls.
- */
 if (closeLightboxButton) {
   closeLightboxButton.addEventListener("click", () => {
     lightbox.hidden = true;
@@ -757,6 +758,8 @@ document.addEventListener("keydown", event => {
     return;
   }
 
+  hideTooltip();
+
   if (lightbox) {
     lightbox.hidden = true;
   }
@@ -770,6 +773,6 @@ document.addEventListener("keydown", event => {
     .classed("selected", false);
 
   svg
-    .selectAll(".city-pin")
+    .selectAll(".city-dot")
     .classed("selected", false);
 });
