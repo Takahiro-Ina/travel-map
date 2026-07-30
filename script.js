@@ -40,7 +40,13 @@ const CONFIG = {
 
   /* Pointer movement below this many pixels still counts as a click rather
      than a drag. Raise it if clicks ever feel like they are being swallowed. */
-  clickSlack: 8
+  clickSlack: 8,
+
+  /* false = a plain scroll wheel over the map scrolls the page, which is what
+     you want when the map is embedded in another site. Trackpad pinch (which
+     browsers report as ctrl+wheel), the +/- buttons and drag-to-pan all still
+     zoom. Set true to zoom on plain scroll as well. */
+  wheelZoom: false
 };
 
 const WORLD_URL =
@@ -972,6 +978,15 @@ function setupMap(data, world) {
      * fail intermittently. Anything under this many pixels is now a click.
      */
     .clickDistance(CONFIG.clickSlack)
+    /*
+     * Same as d3's default filter, except a plain wheel event is ignored when
+     * CONFIG.wheelZoom is off, so the host page keeps its scrolling.
+     */
+    .filter(event =>
+      event.type === "wheel"
+        ? CONFIG.wheelZoom || event.ctrlKey
+        : !event.ctrlKey && !event.button
+    )
     .translateExtent([
       [0, 0],
       [width, height]
